@@ -1,18 +1,18 @@
 .filetable {
   /* width: calc(-360px + 100dvw); */
-  height: calc(-400px + 100dvh);
+  height: calc(-322px + 100dvh);
   border: 1px solid #d1d5db;
 }
 
 .fileTableWithExpansion {
   width: calc(-640px + 100dvw) !important;
-  height: calc(-400px + 100dvh);
+  height: calc(-322px + 100dvh);
   border: 1px solid #d1d5db;
 }
 
 .fileTableWithBothDrawers {
   width: calc(-650px + 100dvw) !important;
-  height: calc(-400px + 100dvh);
+  height: calc(-322px + 100dvh);
   border: 1px solid #d1d5db;
 }
 
@@ -25,7 +25,7 @@
 }
 
 .contentWithExpansion {
-  width: calc(-840px + 100dvw);
+  width: calc(-800px + 100dvw);
   height: calc(100dvh - 58px);
   padding: 3px;
   display: flex;
@@ -121,10 +121,6 @@
   height: 55px;
   object-fit: contain;
 }
-.webImg{
-  width: 80px;
-  height: 80px;
-}
 
 ::placeholder {
   color: rgb(135, 130, 130) !important;
@@ -213,13 +209,13 @@
   flex-wrap: wrap;
   flex: 1;
   padding: 15px;
-  background-color: rgb(var(--theme-palette-neutral-bg-weak));
+  background-color: #ffff;
   scrollbar-width: thin;
   max-height: 100%;
   overflow-y: auto;
   height: 100%;
   z-index: 1;
-  box-shadow: -2px 0px 6px rgb(var(--theme-palette-neutral-bg-strong));
+  box-shadow: -2px 0px 6px #e7e7e7;
 }
 
 .legend {

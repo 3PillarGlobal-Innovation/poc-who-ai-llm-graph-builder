@@ -9,7 +9,7 @@ import {
   TextLink,
   Typography,
 } from '@neo4j-ndl/react';
-import { forwardRef, HTMLProps, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import React from 'react';
 import {
   useReactTable,
@@ -30,29 +30,24 @@ import { statusCheck, capitalize } from '../utils/Utils';
 import { SourceNode, CustomFile, FileTableProps, UserCredentials, statusupdate, alertStateType } from '../types';
 import { useCredentials } from '../context/UserCredentials';
 import { MagnifyingGlassCircleIconSolid } from '@neo4j-ndl/react/icons';
-import CustomAlert from './UI/Alert';
-import CustomProgressBar from './UI/CustomProgressBar';
+import CustomAlert from './Alert';
+import CustomProgressBar from './CustomProgressBar';
 import subscribe from '../services/PollingAPI';
 import { triggerStatusUpdateAPI } from '../services/ServerSideStatusUpdateAPI';
 import useServerSideEvent from '../hooks/useSse';
 import { AxiosError } from 'axios';
 import { XMarkIconOutline } from '@neo4j-ndl/react/icons';
 import cancelAPI from '../services/CancelAPI';
-import IconButtonWithToolTip from './UI/IconButtonToolTip';
+import IconButtonWithToolTip from './IconButtonToolTip';
 import { largeFileSize } from '../utils/Constants';
 
-export interface ChildRef {
-  getSelectedRows: () => CustomFile[];
-}
-
-const FileTable = forwardRef<ChildRef, FileTableProps>((props, ref) => {
-  const { isExpanded, connectionStatus, setConnectionStatus, onInspect } = props;
+const FileTable: React.FC<FileTableProps> = ({ isExpanded, connectionStatus, setConnectionStatus, onInspect }) => {
   const { filesData, setFilesData, model, rowSelection, setRowSelection, setSelectedRows } = useFileContext();
   const { userCredentials } = useCredentials();
   const columnHelper = createColumnHelper<CustomFile>();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  // const [currentOuterHeight, setcurrentOuterHeight] = useState<number>(window.outerHeight);
+  //const [currentOuterHeight, setcurrentOuterHeight] = useState<number>(window.outerHeight);
   const [alertDetails, setalertDetails] = useState<alertStateType>({
     showAlert: false,
     alertType: 'error',
@@ -103,16 +98,18 @@ const FileTable = forwardRef<ChildRef, FileTableProps>((props, ref) => {
           );
         },
         cell: ({ row }: { row: Row<CustomFile> }) => {
+          const checkedCase =
+            row.getIsSelected() && row.original.status != 'Uploading' && row.original.status != 'Processing';
           return (
             <div className='px-1'>
-              <IndeterminateCheckbox
-                {...{
-                  checked: row.getIsSelected(),
-                  disabled:
-                    !row.getCanSelect() || row.original.status == 'Uploading' || row.original.status === 'Processing',
-                  indeterminate: row.getIsSomeSelected(),
-                  onChange: row.getToggleSelectedHandler(),
-                }}
+              <Checkbox
+                aria-label='row-checkbox'
+                checked={checkedCase}
+                disabled={
+                  !row.getCanSelect() || row.original.status === 'Uploading' || row.original.status === 'Processing'
+                }
+                onChange={row.getToggleSelectedHandler()}
+                title='select row for deletion'
               />
             </div>
           );
@@ -255,11 +252,7 @@ const FileTable = forwardRef<ChildRef, FileTableProps>((props, ref) => {
       columnHelper.accessor((row) => row, {
         id: 'source',
         cell: (info) => {
-          if (
-            info.row.original.fileSource === 'youtube' ||
-            info.row.original.fileSource === 'Wikipedia' ||
-            info.row.original.fileSource === 'web-url'
-          ) {
+          if (info.row.original.fileSource === 'youtube' || info.row.original.fileSource === 'Wikipedia') {
             return (
               <Flex>
                 <span>
@@ -284,19 +277,7 @@ const FileTable = forwardRef<ChildRef, FileTableProps>((props, ref) => {
       }),
       columnHelper.accessor((row) => row.model, {
         id: 'model',
-        cell: (info) => {
-          const model = info.getValue();
-          return (
-            <i>
-              {(model.includes('LLM_MODEL_CONFIG_')
-                ? capitalize(model.split('LLM_MODEL_CONFIG_').at(-1) as string)
-                : capitalize(model)
-              )
-                .split('_')
-                .join(' ')}
-            </i>
-          );
-        },
+        cell: (info) => <i>{capitalize(info.getValue())}</i>,
         header: () => <span>Model</span>,
         footer: (info) => info.column.id,
       }),
@@ -327,7 +308,7 @@ const FileTable = forwardRef<ChildRef, FileTableProps>((props, ref) => {
               text='Graph'
               size='large'
               label='Graph view'
-              disabled={info.getValue() === 'New' || info.getValue() === 'Uploading'}
+              disabled={!(info.getValue() === 'Completed' || info.getValue() == 'Cancelled')}
               clean
               onClick={() => onInspect(info?.row?.original?.name as string)}
             >
@@ -407,7 +388,7 @@ const FileTable = forwardRef<ChildRef, FileTableProps>((props, ref) => {
               userCredentials &&
               userCredentials.database
             ) {
-              if (item?.fileSize < largeFileSize) {
+              if (item?.fileSize > largeFileSize) {
                 subscribe(
                   item.fileName,
                   userCredentials?.uri,
@@ -604,17 +585,11 @@ const FileTable = forwardRef<ChildRef, FileTableProps>((props, ref) => {
     autoResetPageIndex: false,
     enableRowSelection: true,
     enableMultiRowSelection: true,
-    getRowId: (row) => row.id,
+    getRowId: (row) => JSON.stringify({ ...row }),
     enableSorting: true,
     getSortedRowModel: getSortedRowModel(),
   });
-  useImperativeHandle(
-    ref,
-    () => ({
-      getSelectedRows: () => table.getSelectedRowModel().rows.map((r) => r.original),
-    }),
-    [table]
-  );
+
   useEffect(() => {
     if (tableRef.current) {
       // Component has content, calculate maximum height for table
@@ -640,7 +615,7 @@ const FileTable = forwardRef<ChildRef, FileTableProps>((props, ref) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     table.getColumn('status')?.setFilterValue(e.target.checked);
-    if (!table.getCanNextPage() || table.getPrePaginationRowModel().rows.length) {
+    if (!table.getCanNextPage() || table.getRowCount()) {
       table.setPageIndex(0);
     }
   };
@@ -711,23 +686,6 @@ const FileTable = forwardRef<ChildRef, FileTableProps>((props, ref) => {
       ) : null}
     </>
   );
-});
+};
 
 export default FileTable;
-function IndeterminateCheckbox({
-  indeterminate,
-  className = '',
-  ...rest
-}: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>) {
-  const ref = React.useRef<HTMLInputElement>(null!);
-
-  React.useEffect(() => {
-    if (typeof indeterminate === 'boolean') {
-      ref.current.indeterminate = !rest.checked && indeterminate;
-    }
-  }, [ref, indeterminate]);
-
-  return (
-    <Checkbox aria-label='row checkbox' type='checkbox' ref={ref} className={`${className} cursor-pointer`} {...rest} />
-  );
-}

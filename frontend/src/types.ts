@@ -23,7 +23,6 @@ export interface CustomFileBase extends Partial<globalThis.File> {
   language?: string;
   processingProgress?: number;
   access_token?: string;
-  checked?: boolean;
 }
 export interface CustomFile extends CustomFileBase {
   id: string;
@@ -70,9 +69,9 @@ export type ExtractParams = {
 export type UploadParams = {
   file: Blob;
   model: string;
-  chunkNumber: number;
-  totalChunks: number;
-  originalname: string;
+  chunkNumber:number;
+  totalChunks:number;
+  originalname:string
 } & { [key: string]: any };
 
 export type FormDataParams = ExtractParams | UploadParams;
@@ -151,12 +150,6 @@ export interface ContentProps {
   isRightExpanded: boolean;
   showChatBot: boolean;
   openChatBot: () => void;
-  openTextSchema: () => void;
-  isSchema?: boolean;
-  setIsSchema: Dispatch<SetStateAction<boolean>>;
-  showEnhancementDialog: boolean;
-  setshowEnhancementDialog: Dispatch<SetStateAction<boolean>>;
-  closeSettingModal:()=>void
 }
 
 export interface FileTableProps {
@@ -177,32 +170,12 @@ export interface CustomModalProps {
   setStatus: Dispatch<SetStateAction<'unknown' | 'success' | 'info' | 'warning' | 'danger'>>;
 }
 
-export interface CustomInput {
-  value: string;
-  label: string;
-  placeHolder: string;
-  onChangeHandler: React.ChangeEventHandler<HTMLInputElement>;
-  submitHandler: (url: string) => void;
-  disabledCheck: boolean;
-  onCloseHandler: () => void;
-  id: string;
-  onBlurHandler: React.FocusEventHandler<HTMLInputElement>;
-  status: 'unknown' | 'success' | 'info' | 'warning' | 'danger';
-  setStatus: Dispatch<SetStateAction<'unknown' | 'success' | 'info' | 'warning' | 'danger'>>;
-  statusMessage: string;
-  isValid: boolean;
-  isFocused: boolean;
-  onPasteHandler: React.ClipboardEventHandler<HTMLInputElement>;
-}
-
 export interface CommonButtonProps {
   openModal: () => void;
   wrapperclassName?: string;
   logo: string;
-  title?: string;
+  title: string;
   className?: string;
-  imgWidth?: number;
-  imgeHeight?: number;
 }
 
 export interface Source {
@@ -210,27 +183,20 @@ export interface Source {
   source_name: string;
   start_time?: string;
 }
-export interface chunk {
-  id: string;
-  score: number;
-}
 export interface Messages {
   id: number;
   message: string;
   user: string;
   datetime: string;
   isTyping?: boolean;
-  sources?: string[];
+  sources?: Source[];
   model?: string;
   isLoading?: boolean;
   response_time?: number;
-  chunk_ids?: chunk[];
+  chunk_ids?: string[];
   total_tokens?: number;
   speaking?: boolean;
   copying?: boolean;
-  mode?: string;
-  cypher_query?: string;
-  graphonly_entities?: [];
 }
 
 export type ChatbotProps = {
@@ -252,20 +218,9 @@ export interface GraphViewModalProps {
   viewPoint: string;
   nodeValues?: Node[];
   relationshipValues?: Relationship[];
-  selectedRows?: CustomFile[] | undefined;
 }
 
-export type GraphType = 'Document' | 'Entities' | 'Chunk';
-
-export type PartialLabelNode = Partial<Node> & {
-  labels: string;
-};
-
-export interface CheckboxSectionProps {
-  graphType: GraphType[];
-  loading: boolean;
-  handleChange: (graph: GraphType) => void;
-}
+export type GraphType = 'document' | 'chunks' | 'entities';
 
 export interface fileName {
   fileName: string;
@@ -334,7 +289,6 @@ export type alertStateType = {
 };
 
 export type Scheme = Record<string, string>;
-
 export type LabelCount = Record<string, number>;
 interface NodeType extends Partial<Node> {
   labels?: string[];
@@ -347,32 +301,16 @@ export interface LegendChipProps {
 export interface FileContextProviderProps {
   children: ReactNode;
 }
-export interface orphanNode {
-  id: string;
-  elementId: string;
-  description: string;
-  labels: string[];
-  embedding: null | string;
-}
-export interface orphanNodeProps {
-  documents: string[];
-  chunkConnections: number;
-  e: orphanNode;
-  checked?: boolean;
-}
 export interface labelsAndTypes {
   labels: string[];
   relationshipTypes: string[];
 }
-interface orphanTotalNodes {
-  total: number;
-}
 export interface commonserverresponse {
   status: string;
   error?: string;
-  message?: string | orphanTotalNodes;
+  message?: string;
   file_name?: string;
-  data?: labelsAndTypes | labelsAndTypes[] | uploadData | orphanNodeProps[];
+  data?: labelsAndTypes | labelsAndTypes[] | uploadData;
 }
 
 export interface ScehmaFromText extends Partial<commonserverresponse> {
@@ -380,9 +318,6 @@ export interface ScehmaFromText extends Partial<commonserverresponse> {
 }
 export interface ServerData extends Partial<commonserverresponse> {
   data: labelsAndTypes[];
-}
-export interface OrphanNodeResponse extends Partial<commonserverresponse> {
-  data: orphanNodeProps[];
 }
 export interface schema {
   nodelabels: string[];
@@ -397,14 +332,11 @@ export interface SourceListServerData {
 }
 
 export interface chatInfoMessage extends Partial<Messages> {
-  sources: string[];
+  sources: Source[];
   model: string;
   response_time: number;
-  chunk_ids: chunk[];
+  chunk_ids: string[];
   total_tokens: number;
-  mode: string;
-  cypher_query?: string;
-  graphonly_entities: [];
 }
 
 export interface eventResponsetypes {
@@ -495,7 +427,6 @@ export interface Chunk {
   content_offset?: string;
   url?: string;
   fileSource: string;
-  score?: string;
 }
 
 export interface SpeechSynthesisProps {
@@ -508,66 +439,3 @@ export interface SpeechArgs {
   pitch?: number;
   volume?: number;
 }
-
-export interface SettingsModalProps {
-  open: boolean;
-  onClose: () => void;
-  openTextSchema: () => void;
-  onContinue?: () => void;
-  settingView: 'contentView' | 'headerView';
-  isSchema?: boolean;
-  setIsSchema: Dispatch<SetStateAction<boolean>>;
-  onClear?: () => void;
-}
-export interface Menuitems {
-  title: string;
-  onClick: () => void;
-  disabledCondition: boolean;
-  description?: string | React.ReactNode;
-  isSelected?: boolean;
-  selectedClassName?: string;
-}
-export type Vertical = 'top' | 'bottom';
-export type Horizontal = 'left' | 'right' | 'center';
-export interface Origin {
-  vertical: Vertical;
-  horizontal: Horizontal;
-}
-
-export type BasicNode = {
-  id: string;
-  labels: string[];
-  properties: Record<string, string>;
-  propertyTypes: Record<string, string>;
-};
-
-export type GraphStatsLabels = Record<
-  string,
-  {
-    count: number;
-    properties: Record<string, string>;
-  }
->;
-
-type NodeStyling = {
-  backgroundColor: string;
-  borderColor: string;
-  textColor: string;
-  caption: string;
-  diameter: string;
-};
-
-type RelationStyling = {
-  fontSize: string;
-  lineColor: string;
-  textColorExternal: string;
-  textColorInternal: string;
-  caption: string;
-  padding: string;
-  width: string;
-};
-
-export type GraphStyling = {
-  node: Record<string, Partial<NodeStyling>>;
-  relationship: Record<string, Partial<RelationStyling>>;
-};

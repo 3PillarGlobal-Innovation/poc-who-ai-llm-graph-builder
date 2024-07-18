@@ -55,11 +55,7 @@ def get_graphDB_driver(uri, username, password):
     """
     try:
         logging.info(f"Attempting to connect to the Neo4j database at {uri}")
-        enable_user_agent = os.environ.get("ENABLE_USER_AGENT", "False").lower() in ("true", "1", "yes")
-        if enable_user_agent:
-            driver = GraphDatabase.driver(uri, auth=(username, password), user_agent=os.environ.get('NEO4J_USER_AGENT'))
-        else:
-            driver = GraphDatabase.driver(uri, auth=(username, password))
+        driver = GraphDatabase.driver(uri, auth=(username, password), user_agent=os.environ.get('NEO4J_USER_AGENT'))
         logging.info("Connection successful")
         return driver
     except Exception as e:
@@ -238,7 +234,7 @@ def get_completed_documents(driver):
     return documents
 
 
-def get_graph_results(uri, username, password,document_names):
+def get_graph_results(uri, username, password, query_type,document_names):
     """
     Retrieves graph data by executing a specified Cypher query using credentials and parameters provided.
     Processes the results to extract nodes and relationships and packages them in a structured output.
@@ -257,7 +253,6 @@ def get_graph_results(uri, username, password,document_names):
         logging.info(f"Starting graph query process")
         driver = get_graphDB_driver(uri, username, password)  
         document_names= list(map(str.strip, json.loads(document_names)))
-        query_type = "docChunkEntities"
         query = get_cypher_query(QUERY_MAP, query_type, document_names)
         records, summary , keys = execute_query(driver, query, document_names)
         document_nodes = extract_node_elements(records)
