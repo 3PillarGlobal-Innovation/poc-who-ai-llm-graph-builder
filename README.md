@@ -10,6 +10,70 @@ You can use any [Neo4j Aura database](https://neo4j.com/aura/) (including the fr
 If you are using Neo4j Desktop, you will not be able to use the docker-compose but will have to follow the [separate deployment of backend and frontend section](#running-backend-and-frontend-separately-dev-environment). :warning:
 
 ### Deploy locally
+
+#### Running Neo4j locally
+1. Create a separate folder named neo4j and create a file docker-compose.yml and paste the below content
+```env 
+version: "3.8"
+services:
+  neo4j:
+    container_name: neo4j
+    image: neo4j:5.16
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/plugins:/plugins
+      - ./neo4j/import:/import
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/super-secret
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,algo.*
+      - NEO4J_dbms_security_procedures_allowlist=apoc.*
+      - NEO4J_server_memory_heap_initial__size=512m
+      - NEO4J_server_memory_heap_max__size=2G
+      - NEO4J_apoc_uuid_enabled=true
+      - NEO4J_server_default__listen__address=0.0.0.0
+      - NEO4J_initial_dbms_default__database=neo4j
+    restart: unless-stopped
+    networks:
+      - net
+# use docker volume to persist data outside of a container.
+networks:
+  net:
+
+volumes:
+  neo4j:
+```
+2. Run "docker compose up -d"
+
+#### Cloning repo and running neo4j llm graph builder
+
+1. Clone https://github.com/3PillarGlobal-Innovation/poc-who-ai-llm-graph-builder.git
+2. Checkout branch "feature-azure-openai"
+3. Rename example.env to .env
+4. Add values for the below env variables
+```env
+AZURE_OPENAI_API_KEY=""
+AZURE_OPENAI_MODEL=""
+AZURE_OPENAI_ENDPOINT=""
+AZURE_OPENAI_DEPLOYMENT_NAME=""
+OPENAI_API_VERSION=""
+```
+5. Replace values for the below env variables 
+```env
+NEO4J_URI = "neo4j://<your-local-ip-address>:7687"
+NEO4J_USERNAME = "neo4j"
+NEO4J_PASSWORD = "super-secret"
+BACKEND_API_URL="http://<your-local-ip-address>:8000"
+```
+6. Run "docker compose up -d"
+
+#### Proceed with next steps for specific use-cases only
+
 #### Running through docker-compose
 By default only OpenAI and Diffbot are enabled since Gemini requires extra GCP configurations.
 
