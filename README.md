@@ -67,7 +67,7 @@ OPENAI_API_VERSION=""
 ```env
 NEO4J_URI = "neo4j://<your-local-ip-address>:7687"
 NEO4J_USERNAME = "neo4j"
-NEO4J_PASSWORD = "super-secret"
+NEO4J_PASSWORD = "<ENTER PASSWORD>"
 BACKEND_API_URL="http://<your-local-ip-address>:8000"
 ```
 6. Run "docker compose up -d"
